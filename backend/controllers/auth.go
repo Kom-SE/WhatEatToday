@@ -46,7 +46,7 @@ func Register(ctx *gin.Context) {
 		return
 	}
 	user.Password = hashpw
-	token, err := utils.GenerateJWT(user.Username, user.UserType)
+	token, err := utils.GenerateJWT(user.ID, user.UserType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -97,7 +97,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := utils.GenerateJWT(input.Username, user.UserType)
+	token, err := utils.GenerateJWT(user.ID, user.UserType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

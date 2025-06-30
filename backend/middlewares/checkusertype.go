@@ -8,7 +8,7 @@ import (
 
 func CheckUserType(allowedType ...int) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userType, exists := ctx.Get("user_type")
+		userType, exists := ctx.Get("usertype")
 		if !exists {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"error": "User type not found in context",

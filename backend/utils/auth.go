@@ -15,9 +15,9 @@ func BcryptPW(password string) (string, error) {
 }
 
 // 生成JWT令牌
-func GenerateJWT(username string, usertype uint8) (string, error) {
+func GenerateJWT(userid uint, usertype uint8) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
+		"userid":   userid,
 		"usertype": usertype,
 		"exp":      time.Now().Add((time.Hour * 72)).Unix()})
 
@@ -32,7 +32,7 @@ func CheckPW(password, hash string) bool {
 }
 
 // 验证JWT令牌
-func ParseJWT(tokenString string) (string, error) {
+func ParseJWT(tokenString string) (uint8, uint8, error) {
 	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
 		tokenString = tokenString[7:]
 	}
@@ -43,16 +43,22 @@ func ParseJWT(tokenString string) (string, error) {
 		return []byte("secret for gods"), nil
 	})
 
-	if err != nil {
-		return "", nil
+	if err != nil || !token.Valid {
+		return 0, 3, nil
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		username, ok := claims["username"].(string)
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		userid, ok := claims["userid"].(float64)
 		if !ok {
-			return "", errors.New("invalid token claims")
+			return 0, 3, errors.New("invalid token claims")
 		}
-		return username, nil
+		usertype, ok := claims["usertype"].(float64)
+		if !ok {
+			return 0, 3, errors.New("invalid usertype in token claims")
+		}
+		usertypeFloat := uint8(usertype)
+		useridFloat := uint8(userid)
+		return useridFloat, usertypeFloat, nil
 	}
-	return "", errors.New("invalid token")
+	return 0, 3, errors.New("invalid token")
 }

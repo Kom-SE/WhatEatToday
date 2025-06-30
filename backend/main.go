@@ -8,13 +8,13 @@ import (
 
 func main() {
 	config.InitConfig()
-	fmt.Printf("正在加载配置文件：%+v\n", config.AppConfig)
+	fmt.Printf("正在加载配置文件：%v\n")
 	router := routers.SetupRouter()
 	port := config.AppConfig.App.BackendPort
 	if port == "" {
 		port = "8080"
 	}
 	router.Run(":" + port)
-	fmt.Println("已经完成加载")
+	fmt.Printf("服务器已启动，监听端口：%s\n", port)
 
 }
