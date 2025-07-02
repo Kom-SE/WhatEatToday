@@ -174,3 +174,64 @@ func GetFoodByName(ctx *gin.Context) {
 		}})
 
 }
+
+// 更新食材信息
+func UpdateFoodByName(ctx *gin.Context) {
+	foodname := ctx.PostForm("name")
+	newfoodname := ctx.PostForm("newname")
+	description := ctx.PostForm("description")
+
+	// 检查食材是否存在
+	var food models.Food
+	if err := global.DB.Where("name = ?", foodname).First(&food).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "Food not found",
+		})
+		return
+	}
+
+	foodupdate := make(map[string]interface{})
+
+	if foodname == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Food name is required",
+		})
+		return
+	}
+
+	if newfoodname != "" {
+		foodupdate["name"] = newfoodname // 用于更新食材名称
+	}
+	if description != "" {
+		foodupdate["description"] = description // 更新描述
+	}
+
+	imagecoinfig := utils.ImageUploadConfig{
+		Field:    "image",
+		SavePath: "./images/food",
+		BasicURL: "/image/food",
+		Prefix:   "food",
+	}
+	imageurl, err := utils.UploadImage(ctx, imagecoinfig)
+	if err == nil {
+		foodupdate["image"] = imageurl
+	}
+
+	if len(foodupdate) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "No fields to update",
+		})
+		return
+	}
+
+	if err := global.DB.Model(&food).Updates(foodupdate).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to update food",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Food updated successfully",
+	})
+}

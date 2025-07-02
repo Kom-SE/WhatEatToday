@@ -19,5 +19,7 @@ func SetFoodRouter(routers *gin.Engine) {
 		food.GET("/all", middlewares.CheckUserType(0, 1), controllers.GetAllFood)
 		// 获取食材-Name
 		food.GET("/get", middlewares.CheckUserType(0, 1), controllers.GetFoodByName)
+		// 更新食材信息
+		food.PATCH("/update", middlewares.CheckUserType(0, 1), controllers.UpdateFoodByName)
 	}
 }

@@ -12,6 +12,8 @@ func SetupRouter() *gin.Engine {
 		SetAuthRouter(routers)
 		SetUserRouter(routers)
 		SetFoodRouter(routers)
+		SetLableRouter(routers)
+		SetRecipeRouter(routers)
 	}
 	return routers
 }
