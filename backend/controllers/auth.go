@@ -22,6 +22,8 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
+	user.UserType = 1 // 默认用户类型为1（普通用户）
+
 	var flag bool
 	flag, err := utils.IsExists(&models.User{}, "username", user.Username)
 	if err != nil {

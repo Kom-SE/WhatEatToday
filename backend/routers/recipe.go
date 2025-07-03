@@ -17,6 +17,11 @@ func SetRecipeRouter(routers *gin.Engine) {
 		recipe.PATCH("/update/:id", middlewares.CheckUserType(0, 1), controllers.UpdateRecipe)
 		// 用户删除自己的食谱
 		recipe.DELETE("/delete", middlewares.CheckUserType(0, 1), controllers.DeleteRecipe)
-
+		// 用户获取自己发布的食谱
+		recipe.GET("/get", middlewares.CheckUserType(1), controllers.GetMyRecipe)
+		// 管理员获取所有食谱
+		recipe.GET("/getall", middlewares.CheckUserType(0), controllers.GetRootAllRecipe)
+		// 改变该食谱评论
+		recipe.PATCH("/challow", middlewares.CheckUserType(0, 1), controllers.ChangeRecipeAllow)
 	}
 }

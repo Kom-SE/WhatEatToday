@@ -55,7 +55,7 @@ func UploadImage(ctx *gin.Context, config ImageUploadConfig, oldpath ...string) 
 	}
 
 	// 如果有传入旧路径，则考虑后续处理
-	if len(oldpath) > 0 {
+	if len(oldpath) > 0 && oldpath[0] != "" {
 		// 检查旧路径是否存在，如果存在则删除
 		oldpathlist := strings.Split(oldpath[0], ",")
 		if len(oldpath) > 0 {
@@ -130,9 +130,11 @@ func DeleteImage(imageurl string) error {
 	// 更换拼接为相对路径
 	imagepath := filepath.Join("./images", imageurl[7:]) // 去掉前缀"/image/"
 
-	// 检查文件是否存在
+	// 检查文件是否存在。若不存在，不做报错，终止函数
 	if _, err := os.Stat(imagepath); os.IsNotExist(err) {
-		return fmt.Errorf("image file does not exist: %v", err)
+		// 文件不存在时，记录日志但不返回错误
+		fmt.Printf("Warning: Image file does not exist, skipping deletion: %s\n", imagepath)
+		return nil // 不返回错误，认为删除成功
 	}
 
 	// 删除文件

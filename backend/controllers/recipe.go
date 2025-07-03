@@ -226,3 +226,118 @@ func DeleteRecipe(ctx *gin.Context) {
 		"message": "Recipe deleted successfully",
 	})
 }
+
+// 用户获取自己发布的食谱
+func GetMyRecipe(ctx *gin.Context) {
+	userid, exists := ctx.Get("userid")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
+		return
+	}
+
+	type RecipeResponse struct {
+		ID             uint   `json:"id"`
+		Name           string `json:"name"`
+		Description    string `json:"description"`
+		Images         string `json:"images"`
+		AuthorID       uint   `json:"author_id"`
+		FoodID         string `json:"food_id"`
+		CookTime       string `json:"cook_time"`
+		Process        string `json:"process"`
+		Likes          uint   `json:"likes"`
+		CommentAllowed bool   `json:"comment_allowed"`
+	}
+
+	var recipes []RecipeResponse
+	if err := global.DB.Model(&models.Recipe{}).Where("author_id = ?", userid).Find(&recipes).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve recipes: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Recipes retrieved successfully",
+		"recipes": recipes,
+	})
+}
+
+// 管理员获取所有食谱
+func GetRootAllRecipe(ctx *gin.Context) {
+	type RecipeResponse struct {
+		ID             uint   `json:"id"`
+		Name           string `json:"name"`
+		Description    string `json:"description"`
+		Images         string `json:"images"`
+		FoodID         string `json:"food_id"`
+		CookTime       string `json:"cook_time"`
+		Process        string `json:"process"`
+		Likes          uint   `json:"likes"`
+		CommentAllowed bool   `json:"comment_allowed"`
+	}
+
+	var recipes []RecipeResponse
+	if err := global.DB.Model(&models.Recipe{}).Find(&recipes).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve recipes: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Recipes retrieved successfully",
+		"recipes": recipes,
+		"count":   len(recipes),
+	})
+}
+
+// 用户管理发布的食谱评论权限，管理员可以禁止用户评论，普通用户可以开启或禁止评论
+func ChangeRecipeAllow(ctx *gin.Context) {
+	// 获取用户ID和用户类型
+	userid, exists := ctx.Get("userid")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
+		return
+	}
+	usertype, exist := ctx.Get("usertype")
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User type not found"})
+		return
+	}
+
+	// 获取食谱ID
+	type RecipeInput struct {
+		ID             uint `json:"id" binding:"required"`
+		CommentAllowed bool `json:"comment_allowed"`
+	}
+	var input RecipeInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data: " + err.Error()})
+		return
+	}
+
+	// 检查用户权限,权限不同检查不同
+	var existingRecipe models.Recipe
+	switch usertype.(uint8) {
+	case 1: // 普通用户
+		if err := global.DB.Where("id = ? AND author_id = ?", input.ID, userid).First(&existingRecipe).Error; err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found or does not belong to the user"})
+			return
+		}
+	case 0: // 管理员
+		if err := global.DB.Where("id = ?", input.ID).First(&existingRecipe).Error; err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
+			return
+		}
+	}
+
+	// 更新评论权限
+	existingRecipe.CommentAllowed = input.CommentAllowed
+
+	// 保存更新
+	if err := global.DB.Save(&existingRecipe).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update recipe comment permission: " + err.Error()})
+		return
+	}
+
+	// 返回成功响应
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Recipe comment permission updated successfully",
+	})
+}
