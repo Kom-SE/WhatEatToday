@@ -20,6 +20,13 @@ type Config struct {
 		MaxIdleConns int    `mapstructure:"max-idle-conns" yaml:"max-idle-conns"`
 		MaxOpenConns int    `mapstructure:"max-open-conns" yaml:"max-open-conns"`
 	} `mapstructure:"database" yaml:"database"`
+
+	Redis struct {
+		Addr     string `mapstructure:"addr" yaml:"addr"`
+		Password string `mapstructure:"password" yaml:"password"`
+		DB       int    `mapstructure:"db" yaml:"db"`
+		PoolSize int    `mapstructure:"poolsize" yaml:"pool-size"`
+	} `mapstructure:"redis" yaml:"redis"`
 }
 
 var (
@@ -42,4 +49,5 @@ func InitConfig() {
 	}
 
 	InitDB()
+	InitRedis()
 }

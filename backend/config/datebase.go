@@ -6,11 +6,13 @@ import (
 	"main/models"
 	"time"
 
+	"github.com/go-redis/redis"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func InitDB() {
+	// 启动mysql数据库服务
 	dsn := AppConfig.Database.DSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
@@ -42,4 +44,18 @@ func InitDB() {
 	}
 
 	global.DB = db
+}
+
+// 初始化Redis
+func InitRedis() {
+	// 启动Redis服务
+	redisConfig := AppConfig.Redis
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     redisConfig.Addr,
+		Password: redisConfig.Password, // no password set
+		DB:       redisConfig.DB,       // use default DB
+		PoolSize: redisConfig.PoolSize,
+	})
+
+	global.RedisDB = rdb
 }

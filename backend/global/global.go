@@ -1,7 +1,11 @@
 package global
 
-import "gorm.io/gorm"
+import (
+	"github.com/go-redis/redis"
+	"gorm.io/gorm"
+)
 
 var (
-	DB *gorm.DB //数据库连接实例
+	DB      *gorm.DB      //数据库连接实例
+	RedisDB *redis.Client // Redis连接实例
 )
