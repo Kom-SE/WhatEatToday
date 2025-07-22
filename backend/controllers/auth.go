@@ -108,8 +108,9 @@ func Login(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "登录成功",
-		"uid":     user.ID,
-		"token":   token,
+		"message":  "登录成功",
+		"uid":      user.ID,
+		"token":    token,
+		"usertype": user.UserType,
 	})
 }

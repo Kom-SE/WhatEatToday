@@ -142,17 +142,10 @@ func GetAllFood(ctx *gin.Context) {
 
 // 获取食材-Name
 func GetFoodByName(ctx *gin.Context) {
-	var input struct {
-		Name string `json:"name" binding:"required"`
-	}
-	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid input",
-		})
-		return
-	}
 
-	if input.Name == "" {
+	inputname := ctx.Param("name")
+
+	if inputname == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Food name is required",
 		})
@@ -160,7 +153,7 @@ func GetFoodByName(ctx *gin.Context) {
 	}
 
 	var food models.Food
-	if err := global.DB.Where("name = ?", input.Name).First(&food).Error; err != nil {
+	if err := global.DB.Where("name LIKE ?", "%"+inputname+"%").First(&food).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"error": "Food not found",
 		})

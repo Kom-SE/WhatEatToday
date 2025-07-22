@@ -20,7 +20,7 @@ func SetRecipeRouter(routers *gin.Engine) {
 		// 用户获取自己发布的食谱
 		recipe.GET("/get", middlewares.CheckUserType(1), controllers.GetMyRecipe)
 		// 管理员获取所有食谱
-		recipe.GET("/getall", middlewares.CheckUserType(0), controllers.GetRootAllRecipe)
+		recipe.GET("/getall", middlewares.CheckUserType(0, 1), controllers.GetRootAllRecipe)
 		// 改变该食谱评论
 		recipe.PATCH("/challow", middlewares.CheckUserType(0, 1), controllers.ChangeRecipeAllow)
 	}
