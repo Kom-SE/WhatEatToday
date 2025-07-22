@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,9 @@ func CheckUserType(allowedType ...int) gin.HandlerFunc {
 			return
 		}
 
-		userType, _ = userType.(int)
+		fmt.Println("\nUser type", userType)
+
+		userType = int(userType.(uint8))
 
 		allowed := false
 		for _, t := range allowedType {

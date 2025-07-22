@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+
 	"main/global"
 	"main/models"
 	"main/utils"
@@ -48,7 +49,7 @@ func GetUserInfo(ctx *gin.Context) {
 	}
 
 	if outfile.Avatar == "" {
-		outfile.Avatar = "/image/avatar/default/34599220_175523740108_2.jpg"
+		outfile.Avatar = "/image/avatar/default/rice.jpg"
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "User information retrieved successfully",
@@ -60,23 +61,24 @@ func GetUserInfo(ctx *gin.Context) {
 func UpdateUserInfo(ctx *gin.Context) {
 	userid, exists := ctx.Get("userid")
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "User not authenticated",
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "User not Found",
 		})
 		return
 	}
 
-	var userupdate map[string]interface{}
+	type UserUpdate struct {
+		Name     string `json:"name"`
+		Username string `json:"username"`
+		Gender   string `json:"gender"`
+		Phone    string `json:"phone"`
+		Address  string `json:"address"`
+	}
+
+	var userupdate UserUpdate
 	if err := ctx.ShouldBindJSON(&userupdate); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid input data",
-		})
-		return
-	}
-
-	if len(userupdate) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "No data provided for update",
 		})
 		return
 	}
@@ -85,13 +87,6 @@ func UpdateUserInfo(ctx *gin.Context) {
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to update user information",
-		})
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"error": "User not found",
 		})
 		return
 	}
