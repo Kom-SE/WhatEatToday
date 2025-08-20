@@ -177,7 +177,7 @@ func DeleteComment(ctx *gin.Context) {
 	})
 }
 
-// 根据点赞状态进行点赞数增加与减少
+// (直接操作Mysql数据库)根据点赞状态进行点赞数增加与减少
 func ToggleCommentLike(ctx *gin.Context) {
 	// 获取当前用户ID
 	userid, exists := ctx.Get("userid")
@@ -253,4 +253,7 @@ func ToggleCommentLike(ctx *gin.Context) {
 			"message": "Like removed successfully",
 		})
 	}
+
+// (操作redis数据库)记录用户评论的点赞状态改变
+// (操作Mysql数据库)根据redis记录状态改变Mysql中实际数据，间隔时间：1h
 }
