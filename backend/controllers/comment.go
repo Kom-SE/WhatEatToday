@@ -275,4 +275,7 @@ func ToggleCommentLike(ctx *gin.Context) {
 			"message": "Like removed successfully",
 		})
 	}
+
+// (操作redis数据库)记录用户评论的点赞状态改变
+// (操作Mysql数据库)根据redis记录状态改变Mysql中实际数据，间隔时间：1h
 }
