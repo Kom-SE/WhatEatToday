@@ -26,4 +26,8 @@ func SetRecipeRouter(routers *gin.Engine) {
 	}
 
 	recipe.GET("/top", controllers.GetTopRecipes)
+	// 获取食谱详情
+	recipe.GET("/detail/:id", controllers.GetRecipeByID)
+	// 搜索食谱
+	recipe.GET("/search", controllers.SearchRecipes)
 }

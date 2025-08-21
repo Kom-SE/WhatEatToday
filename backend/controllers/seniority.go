@@ -13,8 +13,8 @@ import (
 
 const (
 	TopRecipesRedisKey = "top_recipes:likes"
-	TopRecipesExpire   = 1 * time.Hour // 缓存1小时
-	TopRecipesLimit    = 10            // 获取前10条
+	TopRecipesExpire   = 30 * time.Minute // 缓存30分钟
+	TopRecipesLimit    = 10               // 获取前10条
 )
 
 // TopRecipeCache 缓存的菜谱结构
@@ -125,14 +125,14 @@ func StartCronJobs() *cron.Cron {
 	c := cron.New(cron.WithLogger(cron.VerbosePrintfLogger(log.New(log.Writer(), "cron: ", log.LstdFlags))))
 
 	// 每30分钟执行一次 (0 */30 * * * *)
-	_, err := c.AddFunc("*/30 * * * *", UpdateTopRecipes)
+	_, err := c.AddFunc("*/10 * * * *", UpdateTopRecipes)
 	if err != nil {
 		log.Fatalf("添加热门菜谱更新任务失败: %v", err)
 	}
 
 	// 启动定时任务
 	c.Start()
-	log.Println("定时任务已启动 - 每30分钟更新热门菜谱")
+	log.Println("定时任务已启动 - 每10分钟更新热门菜谱")
 
 	// 程序启动时立即执行一次
 	go UpdateTopRecipes()

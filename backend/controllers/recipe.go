@@ -227,6 +227,39 @@ func DeleteRecipe(ctx *gin.Context) {
 	})
 }
 
+// 根据食谱ID获取食谱详情
+func GetRecipeByID(ctx *gin.Context) {
+	recipeID := ctx.Param("id")
+	if recipeID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Recipe ID is required"})
+		return
+	}
+
+	var recipe models.Recipe
+	if err := global.DB.Where("id = ?", recipeID).First(&recipe).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Recipe retrieved successfully",
+		"recipe": gin.H{
+			"id":              recipe.ID,
+			"name":            recipe.Name,
+			"description":     recipe.Description,
+			"images":          recipe.Images,
+			"author_id":       recipe.AuthorID,
+			"food_id":         recipe.FoodID,
+			"cook_time":       recipe.CookTime,
+			"process":         recipe.Process,
+			"likes":           recipe.Likes,
+			"comment_allowed": recipe.CommentAllowed,
+			"created_at":      recipe.CreatedAt,
+			"updated_at":      recipe.UpdatedAt,
+		},
+	})
+}
+
 // 用户获取自己发布的食谱
 func GetMyRecipe(ctx *gin.Context) {
 	userid, exists := ctx.Get("userid")
@@ -356,5 +389,28 @@ func GetTopRecipes(ctx *gin.Context) {
 		"message": "获取热门菜谱成功",
 		"data":    recipes,
 		"count":   len(recipes),
+	})
+}
+
+// 搜索食谱
+func SearchRecipes(ctx *gin.Context) {
+	type SearchInput struct {
+		Query string `json:"name" binding:"required"`
+	}
+	var input SearchInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data: " + err.Error()})
+		return
+	}
+
+	var recipes []models.Recipe
+	if err := global.DB.Where("name LIKE ?", "%"+input.Query+"%").Find(&recipes).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search recipes: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Recipes retrieved successfully",
+		"recipes": recipes,
 	})
 }

@@ -14,7 +14,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	router.Run(":" + port)
+	router.Run("0.0.0.0:" + port)
 	fmt.Printf("服务器已启动，监听端口：%s\n", port)
 
 }
