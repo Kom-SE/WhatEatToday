@@ -8,7 +8,7 @@ import (
 
 func main() {
 	config.InitConfig()
-	fmt.Printf("正在加载配置文件：%v\n")
+	fmt.Printf("正在加载配置文件：\n")
 	router := routers.SetupRouter()
 	port := config.AppConfig.App.BackendPort
 	if port == "" {

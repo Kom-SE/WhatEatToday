@@ -30,4 +30,6 @@ func SetRecipeRouter(routers *gin.Engine) {
 	recipe.GET("/detail/:id", controllers.GetRecipeByID)
 	// 搜索食谱
 	recipe.GET("/search", controllers.SearchRecipes)
+	// 随机获取一个食谱
+	recipe.GET("/random", controllers.GetRandomRecipe)
 }

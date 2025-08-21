@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"main/config"
 	"time"
 
@@ -15,9 +14,9 @@ func SetupCorsMiddleware() gin.HandlerFunc {
 	if port == "" {
 		port = "5173"
 	}
-	URL := fmt.Sprintf("http://localhost:%s", port)
+	//URL := fmt.Sprintf("http://localhost:%s", port)
 	return cors.New(cors.Config{
-		AllowOrigins:     []string{URL},
+		AllowOrigins:     []string{"*"}, // 允许所有来源
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
