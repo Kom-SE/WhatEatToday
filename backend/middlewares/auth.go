@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"main/utils"
 	"net/http"
 
@@ -17,17 +18,19 @@ func CheckJWT() gin.HandlerFunc {
 			// 如果存在atoken，则验证其有效性
 			userid, usertype, err = utils.ParseJWT(atoken)
 		}
-
+		fmt.Println("中间件", userid, usertype, err)
 		// 如果没有atoken或验证失败，则尝试使用rtoken刷新atoken
 		if err != nil {
+			fmt.Println("中间件01", userid, usertype, err)
 			rtoken, err = ctx.Cookie("rtoken")
 			if err != nil {
+				fmt.Println("中间件02", userid, usertype, err)
 				// rtoenken不存在，返回401状态码，要求用户重新登录
 				ctx.JSON(http.StatusUnauthorized, gin.H{"error": "请先登录"})
 				ctx.Abort()
 				return
 			}
-
+			fmt.Println("中间件03", userid, usertype, err)
 			// 刷新atoken和rtoken
 			atoken, rtoken, err = utils.RefreshAToken(rtoken)
 			if err != nil {

@@ -414,3 +414,30 @@ func SearchRecipes(ctx *gin.Context) {
 		"recipes": recipes,
 	})
 }
+
+// 随机获取一个食谱
+func GetRandomRecipe(ctx *gin.Context) {
+	var recipe models.Recipe
+	if err := global.DB.Order("RAND()").First(&recipe).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve random recipe: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Random recipe retrieved successfully",
+		"recipe": gin.H{
+			"id":              recipe.ID,
+			"name":            recipe.Name,
+			"description":     recipe.Description,
+			"images":          recipe.Images,
+			"author_id":       recipe.AuthorID,
+			"food_id":         recipe.FoodID,
+			"cook_time":       recipe.CookTime,
+			"process":         recipe.Process,
+			"likes":           recipe.Likes,
+			"comment_allowed": recipe.CommentAllowed,
+			"created_at":      recipe.CreatedAt,
+			"updated_at":      recipe.UpdatedAt,
+		},
+	})
+}

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"main/global"
 	"main/models"
 	"main/utils"
@@ -94,6 +95,7 @@ func Register(ctx *gin.Context) {
 
 // 登录账户
 func Login(ctx *gin.Context) {
+	fmt.Println("登录账户")
 	var input struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -105,7 +107,7 @@ func Login(ctx *gin.Context) {
 		})
 		return
 	}
-
+	fmt.Println("登录账户tag01", input.Username, input.Password)
 	var user models.User
 	if err := global.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -120,7 +122,7 @@ func Login(ctx *gin.Context) {
 		})
 		return
 	}
-
+	fmt.Println("登录账户tag02")
 	// 生成JWT令牌
 	atoken, rtoken, err := utils.GenerateJWT(user.ID, user.UserType)
 	if err != nil {
