@@ -189,17 +189,30 @@ func ToggleCommentLike(ctx *gin.Context) {
 	// 获取评论ID
 	var input struct {
 		CommentID uint `json:"comment_id" binding:"required"` // 评论ID
+		RecipeID  uint `json:"recipe_id" binding:"required"`  // 食谱ID
 	}
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	// 查询评论是否存在
 	var comment models.Comment
-	if err := global.DB.Where("id = ?", input.CommentID).First(&comment).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
-		return
+	var recipe models.Recipe
+	// 检查存在评论/菜谱
+	if input.CommentID == 0 {
+		// 检查菜谱是否存在
+
+		if err := global.DB.Where("id = ?", input.RecipeID).First(&recipe).Error; err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
+			return
+		}
+	} else {
+		// 查询评论是否存在
+
+		if err := global.DB.Where("id = ?", input.CommentID).First(&comment).Error; err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+			return
+		}
 	}
 
 	// 检查用户是否已经点赞
@@ -210,6 +223,7 @@ func ToggleCommentLike(ctx *gin.Context) {
 			newLike := models.CommentLike{
 				UserID:    uint(userid.(uint8)), // 将userid转换为uint
 				CommentID: input.CommentID,
+				RecipeID:  input.RecipeID,
 			}
 
 			// 创建新的点赞记录
@@ -220,10 +234,18 @@ func ToggleCommentLike(ctx *gin.Context) {
 			}
 
 			// 增加点赞数
-			comment.Likes++
-			if err := global.DB.Save(&comment).Error; err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add like count"})
-				return
+			if input.CommentID != 0 {
+				comment.Likes++
+				if err := global.DB.Save(&comment).Error; err != nil {
+					ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add like count"})
+					return
+				}
+			} else {
+				recipe.Likes++
+				if err := global.DB.Save(&recipe).Error; err != nil {
+					ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add like count"})
+					return
+				}
 			}
 		}
 		// 返回成功响应

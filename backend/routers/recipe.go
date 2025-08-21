@@ -24,4 +24,6 @@ func SetRecipeRouter(routers *gin.Engine) {
 		// 改变该食谱评论
 		recipe.PATCH("/challow", middlewares.CheckUserType(0, 1), controllers.ChangeRecipeAllow)
 	}
+
+	recipe.GET("/top", controllers.GetTopRecipes)
 }

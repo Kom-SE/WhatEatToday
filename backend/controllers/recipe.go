@@ -341,3 +341,20 @@ func ChangeRecipeAllow(ctx *gin.Context) {
 		"message": "Recipe comment permission updated successfully",
 	})
 }
+
+// 获取热门菜谱（从Redis缓存）
+func GetTopRecipes(ctx *gin.Context) {
+	recipes, err := GetTopRecipesFromCache()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "获取热门菜谱失败",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "获取热门菜谱成功",
+		"data":    recipes,
+		"count":   len(recipes),
+	})
+}

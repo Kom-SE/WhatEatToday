@@ -22,6 +22,7 @@ func CheckJWT() gin.HandlerFunc {
 		if err != nil {
 			rtoken, err = ctx.Cookie("rtoken")
 			if err != nil {
+				// rtoenken不存在，返回401状态码，要求用户重新登录
 				ctx.JSON(http.StatusUnauthorized, gin.H{"error": "请先登录"})
 				ctx.Abort()
 				return
