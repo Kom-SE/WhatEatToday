@@ -2,7 +2,12 @@ package config
 
 import (
 	"log"
+	"main/controllers"
+	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/robfig/cron/v3"
 	"github.com/spf13/viper"
 )
 
@@ -50,4 +55,25 @@ func InitConfig() {
 
 	InitDB()
 	InitRedis()
+	// 启动定时任务
+	cronManager := controllers.StartCronJobs()
+
+	// 设置优雅关闭
+	setupGracefulShutdown(cronManager)
+}
+
+func setupGracefulShutdown(cronManager *cron.Cron) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		log.Println("收到关闭信号，正在优雅关闭...")
+
+		// 停止定时任务
+		controllers.StopCronJobs(cronManager)
+
+		log.Println("应用已关闭")
+		os.Exit(0)
+	}()
 }
