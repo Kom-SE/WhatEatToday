@@ -15,6 +15,7 @@ type Recipe struct {
 	Process        string `gorm:"type:text;column:process" json:"process"`                 // Cooking process
 	Likes          uint   `gorm:"type:int;default:0;column:likes" json:"likes"`            // Number of likes
 	CommentAllowed bool   `gorm:"type:bool;column:comment_allowed" json:"comment_allowed"` // Whether comments are allowed
+	Tags           string `gorm:"type:text;column:tags" json:"tags"`                       // Tags associated with the recipe
 
 	//ThisFoodID   Food `gorm:"foreignKey:FoodID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`   // Food associated with the recipe
 	ThisAuthorID User `gorm:"foreignKey:AuthorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"` // User who created the recipe
