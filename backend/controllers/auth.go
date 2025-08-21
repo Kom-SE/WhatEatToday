@@ -61,23 +61,24 @@ func Register(ctx *gin.Context) {
 		return
 	}
 	user.Password = hashpw
-	atoken, rtoken, err := utils.GenerateJWT(user.ID, user.UserType)
+	//atoken, rtoken, err := utils.GenerateJWT(user.ID, user.UserType)
+	token, err := utils.GenerateJWT(user.ID, user.UserType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	// 存储刷新令牌到Redis
-	if err := utils.SetRtoken(uint8(user.ID), rtoken); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	// 设置cookies
-	ctx.SetCookie("atoken", atoken, 3600*2, "/", "", false, true)
-	ctx.SetCookie("rtoken", rtoken, 3600*24*30, "/", "", false, true)
+	// // 存储刷新令牌到Redis
+	// if err := utils.SetRtoken(uint8(user.ID), rtoken); err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{
+	// 		"error": err.Error(),
+	// 	})
+	// 	return
+	// }
+	// // 设置cookies
+	// ctx.SetCookie("atoken", atoken, 3600*2, "/", "", false, true)
+	// ctx.SetCookie("rtoken", rtoken, 3600*24*30, "/", "", false, true)
 
 	// 设置默认用户类型为1（普通用户）,其他权限序需要后台修改
 
@@ -89,7 +90,11 @@ func Register(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "注册成功",
+		"message":  "登录成功",
+		"uid":      user.ID,
+		"usertype": user.UserType,
+		"jwt":      token,
+		"username": user.Username,
 	})
 }
 
@@ -107,7 +112,7 @@ func Login(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("登录账户tag01", input.Username, input.Password)
+	// fmt.Println("登录账户tag01", input.Username, input.Password)
 	var user models.User
 	if err := global.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -122,9 +127,10 @@ func Login(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("登录账户tag02")
+	// fmt.Println("登录账户tag02")
 	// 生成JWT令牌
-	atoken, rtoken, err := utils.GenerateJWT(user.ID, user.UserType)
+	//atoken, rtoken, err := utils.GenerateJWT(user.ID, user.UserType)
+	token, err := utils.GenerateJWT(user.ID, user.UserType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -132,19 +138,21 @@ func Login(ctx *gin.Context) {
 		return
 	}
 	// 存储刷新令牌到Redis
-	if err := utils.SetRtoken(uint8(user.ID), rtoken); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	// 设置cookies
-	ctx.SetCookie("atoken", atoken, 3600*2, "/", "", false, true)
-	ctx.SetCookie("rtoken", rtoken, 3600*24*30, "/", "", false, true)
+	// if err := utils.SetRtoken(uint8(user.ID), rtoken); err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{
+	// 		"error": err.Error(),
+	// 	})
+	// 	return
+	// }
+	// // 设置cookies
+	// ctx.SetCookie("atoken", atoken, 3600*2, "/", "", false, true)
+	// ctx.SetCookie("rtoken", rtoken, 3600*24*30, "/", "", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message":  "登录成功",
 		"uid":      user.ID,
 		"usertype": user.UserType,
+		"jwt":      token,
+		"username": user.Username,
 	})
 }
