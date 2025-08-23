@@ -198,3 +198,121 @@ func UpdateUserAvatar(ctx *gin.Context) {
 		"avatar":  avatarurl,
 	})
 }
+
+// 收藏食谱
+func CollectRecipe(ctx *gin.Context) {
+	userid, exists := ctx.Get("userid")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "User not authenticated",
+		})
+		return
+	}
+
+	var input struct {
+		RecipeID uint `json:"recipe_id" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid input data",
+		})
+		return
+	}
+
+	// 检查是否已收藏该食谱
+	var existingCollection models.CollectedRecipes
+	if err := global.DB.Where("user_id = ? AND recipe_id = ?", userid, input.RecipeID).First(&existingCollection).Error; err == nil {
+		ctx.JSON(http.StatusConflict, gin.H{
+			"error": "Recipe already collected",
+		})
+		return
+	}
+
+	// 创建收藏记录
+	collection := models.NewCollectedRecipes()
+
+	if err := global.DB.Create(&collection).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to collect recipe",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Recipe collected successfully",
+	})
+}
+
+// 获取所有收藏的食谱
+func GetCollectedRecipes(ctx *gin.Context) {
+	userid, exists := ctx.Get("userid")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "User not authenticated",
+		})
+		return
+	}
+
+	var collections []models.CollectedRecipes
+	if err := global.DB.Where("user_id = ?", userid).Find(&collections).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve collected recipes",
+		})
+		return
+	}
+
+	var userfrecipe []models.Recipe
+	for _, collection := range collections {
+		var recipe models.Recipe
+		if err := global.DB.Where("id = ?", collection.RecipeID).First(&recipe).Error; err == nil {
+			userfrecipe = append(userfrecipe, recipe)
+		}
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Collected recipes retrieved successfully",
+		"data":    userfrecipe,
+	})
+}
+
+// 取消收藏食谱
+func UncollectRecipe(ctx *gin.Context) {
+	userid, exists := ctx.Get("userid")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "User not authenticated",
+		})
+		return
+	}
+
+	var input struct {
+		RecipeID uint `json:"recipe_id" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid input data",
+		})
+		return
+	}
+
+	result := global.DB.Where("user_id = ? AND recipe_id = ?", userid, input.RecipeID).Delete(&models.CollectedRecipes{})
+	if result.Error != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to uncollect recipe",
+		})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "Collection not found",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Recipe uncollected successfully",
+	})
+}

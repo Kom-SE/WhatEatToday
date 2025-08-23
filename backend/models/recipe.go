@@ -6,12 +6,15 @@ import (
 
 type Recipe struct {
 	gorm.Model
-	Name           string `gorm:"type:varchar(255);not null;column:name" json:"name"`  // Recipe name
-	AuthorID       uint   `gorm:"type:int;not null;column:author_id" json:"author_id"` // Author of the recipe
-	Description    string `gorm:"type:text;column:description" json:"description"`     // Description of the recipe
-	Images         string `gorm:"type:text;column:images" json:"images"`               // Image URLs associated with the recipe
+	Title          string `gorm:"type:varchar(255);not null;column:title" json:"title"` // Recipe name
+	AuthorID       uint   `gorm:"type:int;not null;column:author_id" json:"author_id"`  // Author of the recipe
+	Description    string `gorm:"type:text;column:description" json:"description"`      // Description of the recipe
+	Images         string `gorm:"type:text;column:images" json:"images"`                // Image URLs associated with the recipe
 	FoodID         string `gorm:"column:food_id;" json:"food_id"`
+	Servings       string `gorm:"type:varchar(255);column:servings" json:"servings"`       // Number of servings
 	CookTime       string `gorm:"type:varchar(255);column:cook_time" json:"cook_time"`     // Associated images
+	Difficulty     string `gorm:"type:varchar(50);column:difficulty" json:"difficulty"`    // Difficulty level
+	Needs          string `gorm:"type:text;column:needs" json:"needs"`                     // Ingredients needed (stored as JSON string)
 	Process        string `gorm:"type:text;column:process" json:"process"`                 // Cooking process
 	Likes          uint   `gorm:"type:int;default:0;column:likes" json:"likes"`            // Number of likes
 	CommentAllowed bool   `gorm:"type:bool;column:comment_allowed" json:"comment_allowed"` // Whether comments are allowed

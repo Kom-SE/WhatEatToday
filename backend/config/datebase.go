@@ -38,6 +38,7 @@ func InitDB() {
 		&models.Recipe{},
 		&models.Comment{},
 		&models.CommentLike{},
+		&models.CollectedRecipes{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database tables, got error: %v", err)

@@ -20,7 +20,7 @@ const (
 // TopRecipeCache 缓存的菜谱结构
 type TopRecipeCache struct {
 	ID          uint      `json:"id"`
-	Name        string    `json:"name"`
+	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Images      string    `json:"images"`
 	Likes       uint      `json:"likes"`
@@ -53,7 +53,7 @@ func UpdateTopRecipes() {
 	for _, recipe := range topRecipes {
 		cacheRecipe := TopRecipeCache{
 			ID:          recipe.ID,
-			Name:        recipe.Name,
+			Title:       recipe.Title,
 			Description: recipe.Description,
 			Images:      recipe.Images,
 			Likes:       recipe.Likes,

@@ -1,8 +1,38 @@
 <template>
   <div class="container mx-auto p-6">
-    <div v-if="recipe" class="bg-white p-6 rounded shadow">
-      <img :src="recipe.images" class="w-full h-64 object-cover rounded mb-4" />
-      <h1 class="text-2xl font-bold mb-2">{{ recipe.name }}</h1>
+    <div v-if="recipe" class="recipecard">
+      <h1>{{ recipe.Title }}</h1>
+      <div style="width: 80%;border:2px solid #999999;height: 0px; margin:5px auto 0 auto"></div>
+      
+      <div class="imageStyle">
+        <img :src="recipe.images" class="recipe-image"/>
+      </div>
+
+      <!-- 重新设计的分享组件 -->
+      <div class="share-container">
+        <el-button class="share-left"><el-icon><StarFilled/></el-icon> 收藏菜谱</el-button>
+        <el-button class="share-left"> <el-icon><Plus /></el-icon>加入专辑</el-button>
+
+        <div class="share-text">分享</div>
+        <div class="share-buttons">
+          <div class="share-item" @click="shareToQQ" title="分享到QQ空间">
+            <img class="share-img" src="../assets/share/share_qq_active.png" alt="QQ">
+            <span class="share-label">QQ空间</span>
+          </div>
+          <div class="share-item" @click="shareToWx" title="分享到微信">
+            <img class="share-img" src="../assets/share/share_wx_active.png" alt="微信">
+            <span class="share-label">微信</span>
+          </div>
+          <div class="share-item" @click="shareToWb" title="分享到微博">
+            <img class="share-img" src="../assets/share/share_weibo_active.png" alt="微博">
+            <span class="share-label">微博</span>
+          </div>
+          <div class="share-item" @click="shareToMobile" title="手机扫码查看">
+            <img class="share-img" src="../assets/share/share_mobile_active.png" alt="手机">
+            <span class="share-label">扫码</span>
+          </div>
+        </div>
+      </div>
       <p class="text-gray-700 mb-4">{{ recipe.description }}</p>
 
       <div class="mb-4">

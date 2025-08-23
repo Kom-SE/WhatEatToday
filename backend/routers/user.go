@@ -19,5 +19,11 @@ func SetUserRouter(routers *gin.Engine) {
 		user.PATCH("/avatar", controllers.UpdateUserAvatar)
 		// 注销用户（软删除）
 		user.DELETE("/delete", middlewares.CheckUserType(0, 1), controllers.DeleteUser)
+		// 收藏食谱
+		user.POST("/collect", middlewares.CheckUserType(1), controllers.CollectRecipe)
+		// 获取收藏所有食谱
+		user.GET("/collects", middlewares.CheckUserType(1), controllers.GetCollectedRecipes)
+		// 取消收藏食谱
+		user.DELETE("/collect", middlewares.CheckUserType(1), controllers.UncollectRecipe)
 	}
 }

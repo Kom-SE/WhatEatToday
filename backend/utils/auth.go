@@ -117,6 +117,7 @@ func ParseJWT(tokenString string) (uint, uint8, error) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userid := claims["userid"].(float64)
 		usertype := uint8(claims["user_type"].(float64))
+
 		return uint(userid), uint8(usertype), nil
 	}
 

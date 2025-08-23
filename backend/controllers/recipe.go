@@ -36,15 +36,15 @@ func AddRecipe(ctx *gin.Context) {
 
 	// 检查是否存在该食谱
 	var existingRecipe models.Recipe
-	if err := global.DB.Select("id").Where("name = ?", recipeInput.Name).First(&existingRecipe).Error; err == nil {
-		ctx.JSON(http.StatusConflict, gin.H{"error": "Recipe with this name already exists"})
+	if err := global.DB.Select("id").Where("title = ?", recipeInput.Title).First(&existingRecipe).Error; err == nil {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "Recipe with this Title already exists"})
 		return
 	}
 	// 接受一张或者多张图片
 	imageconfig := utils.ImageUploadConfig{
 		Field:    "image",
-		SavePath: "./images/recipe" + "/" + recipeInput.Name,
-		BasicURL: "/image/recipe" + "/" + recipeInput.Name,
+		SavePath: "./images/recipe" + "/" + recipeInput.Title,
+		BasicURL: "/image/recipe" + "/" + recipeInput.Title,
 		Prefix:   "recipe",
 	}
 
@@ -59,7 +59,7 @@ func AddRecipe(ctx *gin.Context) {
 	}
 
 	// 使用recipeinput在数据库中创建食谱
-	recipeInput.AuthorID = uint(userid.(uint8)) // 将userid转换为uint类型
+	recipeInput.AuthorID = userid.(uint) // 断言为为uint类型
 
 	if err := global.DB.Create(&recipeInput).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create recipe: " + err.Error()})
@@ -70,7 +70,7 @@ func AddRecipe(ctx *gin.Context) {
 		"message": "Recipe created successfully",
 		"recipe": gin.H{
 			"id":              recipeInput.ID,
-			"name":            recipeInput.Name,
+			"Title":           recipeInput.Title,
 			"author_id":       recipeInput.AuthorID,
 			"description":     recipeInput.Description,
 			"images":          recipeInput.Images,
@@ -137,8 +137,8 @@ func UpdateRecipe(ctx *gin.Context) {
 	if newimage, exists := form.File["image"]; exists && len(newimage) > 0 {
 		imageconfig := utils.ImageUploadConfig{
 			Field:    "image",
-			SavePath: "./images/recipe" + "/" + recipeInput.Name,
-			BasicURL: "/image/recipe" + "/" + recipeInput.Name,
+			SavePath: "./images/recipe" + "/" + recipeInput.Title,
+			BasicURL: "/image/recipe" + "/" + recipeInput.Title,
 			Prefix:   "recipe",
 		}
 		var err error
@@ -245,7 +245,7 @@ func GetRecipeByID(ctx *gin.Context) {
 		"message": "Recipe retrieved successfully",
 		"recipe": gin.H{
 			"id":              recipe.ID,
-			"name":            recipe.Name,
+			"Title":           recipe.Title,
 			"description":     recipe.Description,
 			"images":          recipe.Images,
 			"author_id":       recipe.AuthorID,
@@ -270,7 +270,7 @@ func GetMyRecipe(ctx *gin.Context) {
 
 	type RecipeResponse struct {
 		ID             uint   `json:"id"`
-		Name           string `json:"name"`
+		Title          string `json:"title"`
 		Description    string `json:"description"`
 		Images         string `json:"images"`
 		AuthorID       uint   `json:"author_id"`
@@ -297,7 +297,7 @@ func GetMyRecipe(ctx *gin.Context) {
 func GetRootAllRecipe(ctx *gin.Context) {
 	type RecipeResponse struct {
 		ID             uint   `json:"id"`
-		Name           string `json:"name"`
+		Title          string `json:"title"`
 		Description    string `json:"description"`
 		Images         string `json:"images"`
 		FoodID         string `json:"food_id"`
@@ -395,7 +395,7 @@ func GetTopRecipes(ctx *gin.Context) {
 // 搜索食谱
 func SearchRecipes(ctx *gin.Context) {
 	type SearchInput struct {
-		Query string `json:"name" binding:"required"`
+		Query string `json:"title" binding:"required"`
 	}
 	var input SearchInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -404,7 +404,7 @@ func SearchRecipes(ctx *gin.Context) {
 	}
 
 	var recipes []models.Recipe
-	if err := global.DB.Where("name LIKE ?", "%"+input.Query+"%").Find(&recipes).Error; err != nil {
+	if err := global.DB.Where("title LIKE ?", "%"+input.Query+"%").Find(&recipes).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search recipes: " + err.Error()})
 		return
 	}
@@ -427,7 +427,7 @@ func GetRandomRecipe(ctx *gin.Context) {
 		"message": "Random recipe retrieved successfully",
 		"recipe": gin.H{
 			"id":              recipe.ID,
-			"name":            recipe.Name,
+			"Title":           recipe.Title,
 			"description":     recipe.Description,
 			"images":          recipe.Images,
 			"author_id":       recipe.AuthorID,
